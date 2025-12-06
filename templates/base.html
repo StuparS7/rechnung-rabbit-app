@@ -24,6 +24,14 @@
         .button-primary { background-color: #3b82f6; color: white; }
         .button-secondary { background-color: #fff; color: #3b82f6; border-color: #d1d5db; }
         .logout-btn { background-color: #ef4444; color: white; }
+
+        /* Stiluri Responsive */
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .nav-links { margin-left: 0; order: 3; }
+            .auth-buttons { margin-left: 0; order: 2; }
+            main { padding: 0 1rem; } /* Adaugă padding lateral pentru conținut pe mobil */
+        }
     </style>
     {% block head_styles %}{% endblock %}
 </head>

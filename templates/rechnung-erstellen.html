@@ -75,6 +75,31 @@
         summary { font-weight: 500; color: #475569; cursor: pointer; }
         .legal-details-content { margin-top: 1rem; }
     </style>
+    <style>
+        /* Stiluri Responsive pentru pagina de creare factură */
+        @media (max-width: 768px) {
+            .container { padding: 0.5rem; }
+            form { padding: 1rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .form-grid > div:first-child { border-right: none; padding-right: 0; }
+            .form-row { grid-template-columns: 1fr; }
+
+            /* Wrapper pentru a face tabelul derulabil */
+            .line-items-wrapper {
+                overflow-x: auto;
+                padding-bottom: 1rem; /* Spațiu pentru scrollbar */
+            }
+            .line-items-wrapper .line-item, .line-items-wrapper .line-item-header {
+                min-width: 700px; /* Forțează lățimea minimă pentru a activa scroll-ul */
+            }
+
+            .totals-grid { grid-template-columns: 1fr; }
+            .totals {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -213,21 +238,16 @@
             </div>
 
             <h3>Rechnungspositionen</h3>
-            <div class="line-item line-item-header">
-                <div>Beschreibung</div>
-                <div style="text-align: right;">Menge</div>
-                <div>Einzelpreis (€)</div>
-                <div>MwSt (%)</div> <div>Gesamt (€)</div>
-                <div></div>
+            <div class="line-itemaii
+                </div>
+                <div id="line-items-container"></div>
             </div>
-            <div id="line-items-container"></div>
             <div id="add-item-btn" role="button">Position hinzufügen +</div>
 
             <div class="totals-grid">
                 <div>
-                    <label for="notes">Anmerkungen / Zahlungsbedingungen:</label>
-                    <textarea id="notes" name="notes" rows="4">{{ invoice.notes if invoice else 'Zahlbar innerhalb von 14 Tagen ohne Abzug.' }}</textarea>
-                </div>
+                    <label for="notes">Anmerku         <textarea id="notes" name="notes" rows="4">{{ invoice.notes if invoice else 'Zahlbar innerhalb von 14 Tagen ohne Abzug.' }}</textarea>
+            
                 <div class="totals">
                     <div class="total-row"><span>Netto</span><span id="total-net">0.00 €</span></div>
                     <div class="total-row"><span>Umsatzsteuer</span><span id="total-vat">0.00 €</span></div>
