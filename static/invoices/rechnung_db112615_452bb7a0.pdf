@@ -1,0 +1,207 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<<
+/Type /Pages
+/Count 1
+/Kids [ 4 0 R ]
+>>
+endobj
+2 0 obj
+<<
+/Producer (PyPDF2)
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/Names <<
+/EmbeddedFiles <<
+/Names [ (ZUGFeRD\055invoice\056xml) <<
+/Type /Filespec
+/F (ZUGFeRD\055invoice\056xml)
+/EF <<
+/F <<
+/Type /EmbeddedFile
+/Length 4056
+>>
+stream
+<?xml version="1.0" encoding="UTF-8"?>
+<rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
+                          xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100"
+                          xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
+  <rsm:ExchangedDocumentContext>
+    <ram:GuidelineSpecifiedDocumentContextParameter>
+      <ram:ID>urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2.1:en16931:extended</ram:ID>
+    </ram:GuidelineSpecifiedDocumentContextParameter>
+  </rsm:ExchangedDocumentContext>
+  <rsm:ExchangedDocument>
+    <ram:ID>test</ram:ID>
+    <ram:TypeCode>380</ram:TypeCode>
+    <ram:IssueDateTime>
+      <udt:DateTimeString format="102">20251204</udt:DateTimeString>
+    </ram:IssueDateTime>
+  </rsm:ExchangedDocument>
+  <rsm:SupplyChainTradeTransaction>
+    
+    <ram:IncludedSupplyChainTradeLineItem>
+      <ram:AssociatedDocumentLineDocument>
+        <ram:LineID>1</ram:LineID>
+      </ram:AssociatedDocumentLineDocument>
+      <ram:SpecifiedTradeProduct>
+        <ram:Name></ram:Name>
+      </ram:SpecifiedTradeProduct>
+      <ram:SpecifiedLineTradeDelivery>
+        <ram:BilledQuantity unitCode="C62">1.0</ram:BilledQuantity>
+      </ram:SpecifiedLineTradeDelivery>
+      <ram:SpecifiedLineTradeSettlement>
+        <ram:ApplicableTradeTax>
+          <ram:TypeCode>VAT</ram:TypeCode>
+          <ram:CategoryCode>S</ram:CategoryCode>
+          <ram:RateApplicablePercent>19</ram:RateApplicablePercent>
+        </ram:ApplicableTradeTax>
+        <ram:SpecifiedTradeSettlementLineMonetarySummation>
+          <ram:LineTotalAmount>3.00</ram:LineTotalAmount>
+        </ram:SpecifiedTradeSettlementLineMonetarySummation>
+      </ram:SpecifiedLineTradeSettlement>
+      <ram:IncludedReferencedProduct>
+        <ram:GrossPriceProductTradePrice>
+          <ram:ChargeAmount>3.00</ram:ChargeAmount>
+        </ram:GrossPriceProductTradePrice>
+      </ram:IncludedReferencedProduct>
+    </ram:IncludedSupplyChainTradeLineItem>
+    <ram:ApplicableHeaderTradeAgreement>
+      <ram:SellerTradeParty>
+        <ram:Name></ram:Name>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode></ram:PostcodeCode>
+          <ram:LineOne></ram:LineOne>
+          <ram:CityName></ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
+        </ram:PostalTradeAddress>
+        <ram:SpecifiedTaxRegistration>
+          <ram:ID schemeID="VA"></ram:ID>
+        </ram:SpecifiedTaxRegistration>
+      </ram:SellerTradeParty>
+      <ram:BuyerTradeParty>
+        <!-- Buyer ID - op»õional, dar recomandat dacƒÉ ave»õi un ID de client -->
+        <!-- 
+        <ram:ID>KUNDE-4711</ram:ID>
+        -->
+        <ram:Name></ram:Name>
+        <ram:PostalTradeAddress>
+          <ram:PostcodeCode></ram:PostcodeCode>
+          <ram:LineOne></ram:LineOne>
+          <ram:CityName></ram:CityName>
+          <ram:CountryID>DE</ram:CountryID>
+        </ram:PostalTradeAddress>
+      </ram:BuyerTradeParty>
+    </ram:ApplicableHeaderTradeAgreement>
+    <ram:ApplicableHeaderTradeSettlement>
+      <ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode>
+      <ram:PayeeTradeParty>
+        <ram:Name></ram:Name>
+      </ram:PayeeTradeParty>
+      <ram:SpecifiedTradeSettlementPaymentMeans>
+        <ram:TypeCode>30</ram:TypeCode>
+        <ram:PayeePartyCreditorFinancialAccount>
+          <ram:IBANID></ram:IBANID>
+        </ram:PayeePartyCreditorFinancialAccount>
+      </ram:SpecifiedTradeSettlementPaymentMeans>
+      <ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+        <ram:LineTotalAmount>3.00</ram:LineTotalAmount>
+        <ram:TaxBasisTotalAmount>3.00</ram:TaxBasisTotalAmount>
+        <ram:TaxTotalAmount currencyID="EUR">0.57</ram:TaxTotalAmount>
+        <ram:GrandTotalAmount>3.57</ram:GrandTotalAmount>
+        <ram:DuePayableAmount>3.57</ram:DuePayableAmount>
+      </ram:SpecifiedTradeSettlementHeaderMonetarySummation>
+    </ram:ApplicableHeaderTradeSettlement>
+  </rsm:SupplyChainTradeTransaction>
+</rsm:CrossIndustryInvoice>
+endstream
+>>
+>> ]
+>>
+>>
+>>
+endobj
+4 0 obj
+<<
+/Contents 5 0 R
+/MediaBox [ 0 0 595.2756 841.8898 ]
+/Resources <<
+/Font 6 0 R
+/ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>>
+/Rotate 0
+/Trans <<
+>>
+/Type /Page
+/Parent 1 0 R
+>>
+endobj
+5 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ]
+/Length 869
+>>
+stream
+Gat=*D,8n?&H:Nni@gBMU`,k4is?k<$'6L$"QUe7GVQ&AAtof%g99Bo:1C-2P`:J7qsM#XSicfN&;C_&T6EppN[h>a!X(K^*XG:d8TdL_X3&Nf3_uTO[bLp=8l2bG+qDl!26UVU4p#LEn.(Mk0Mm<C'lm<$j2bJ?C8J:*KTK[PpD>MnE5Cc4/]V#;<dM&8Kf8Ld;2.;3#1n$6N(34CHsYOQM^/hXH\K862MV*N/oi8briaUUB*f1P_G*e"oFce+`/dl?2&k`U@GO>>#3D=?MbA9g=MNFnFoAmV]%+9nUj>Yc$duP-dr'L"(a/tLDjo;>HQ6['9n?*.bb<AFm_Q%)$[QhFUg,J5ZY)48;YIIU>C3C?:kLN<Z_u5Lc*SUN8,LJ_)I^-RKGphW/b*%b/&=0T7[RbCe(!ETGg]WQ4R?KEs*WrUBOZqh:3#@GGE475^VtLG;A*'6JHD(_,L0RXF*Uh1JD*nYhXu,"s)EtS(k/"\82-9J0k>@jei1c!nP'O;b[&o_(8q'=/)pAW6NNEg8^nU"4`BL3nA^W,cF15Ullk!?PMR3hAZ*aK*g)jqn_UY5B!Zo1d=egBKE5!KFA;@B3.',Z[6'6`!?n`(!dK/f%K\WfZN/:Me564u0BE&uWehY6%bijog^6N9a_6L>21OuCNm<#=f9eg20mV7`:2j/i2J6!/5qN`nYN"L6;"V=/p2:HTD*HVpq"lnAMW)_haQE6Y.@S=^59?-.JAB-U>daH$-Mt:imBc#E\7FXXM^RrQ,4+@&$DX>L%BBLW\-cebmDCEZ!ebP)B_teBh`=l9<O;n]S?(&?D/\=Z=u#sPiEKN6YOT<uN0DZ>n)o(Q7XU_\:jBjR%M!%?(Q)ql7K~>
+endstream
+endobj
+6 0 obj
+<<
+/F1 7 0 R
+/F2 8 0 R
+/F3 9 0 R
+>>
+endobj
+7 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+8 0 obj
+<<
+/BaseFont /Helvetica-Bold
+/Encoding /WinAnsiEncoding
+/Name /F2
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+9 0 obj
+<<
+/BaseFont /Helvetica-BoldOblique
+/Encoding /WinAnsiEncoding
+/Name /F3
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000015 00000 n 
+0000000074 00000 n 
+0000000114 00000 n 
+0000004415 00000 n 
+0000004614 00000 n 
+0000005574 00000 n 
+0000005625 00000 n 
+0000005732 00000 n 
+0000005844 00000 n 
+trailer
+<<
+/Size 10
+/Root 3 0 R
+/Info 2 0 R
+>>
+startxref
+5963
+%%EOF

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Warum RechnungRabbit? - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 800px; margin: 2rem auto; padding: 2rem;}
+        .content-card { background-color: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.07); }
+        h1 {font-size: 2.8rem; color: #1e40af; margin-bottom: 1rem; text-align: center;}
+        h2 {font-size: 1.8rem; color: #1e40af; margin-top: 2.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;}
+        p, li {font-size: 1.1rem; color: #475569; line-height: 1.7;}
+        ul { list-style-position: inside; padding-left: 0; }
+        strong { color: #334155; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="content-card">
+        <h1>Warum RechnungRabbit?</h1>
+        <p>In einer Welt, in der die Digitalisierung von Geschäftsprozessen unaufhaltsam voranschreitet, wird die elektronische Rechnungsstellung zur neuen Norm. Ab 2025 wird die e-Rechnung für Transaktionen zwischen Unternehmen (B2B) in Deutschland verpflichtend. RechnungRabbit wurde von Grund auf entwickelt, um diesen Übergang für Selbstständige, Freiberufler und kleine Unternehmen so einfach und reibungslos wie möglich zu gestalten.</p>
+
+        <h2>Unser Kernversprechen: Maximale Einfachheit</h2>
+        <p>Wir glauben, dass Sie Ihre wertvolle Zeit nicht mit komplizierter Software verbringen sollten. Unser Ziel war es, den schnellsten und intuitivsten Weg zur Erstellung einer gesetzeskonformen e-Rechnung zu schaffen.</p>
+        <ul>
+            <li><strong>Intuitive Benutzeroberfläche:</strong> In weniger als 30 Sekunden von der Dateneingabe zur fertigen Rechnung. Kein Suchen, kein Rätselraten.</li>
+            <li><strong>Automatisierte Prozesse:</strong> Speichern Sie Ihre Firmendaten und Kunden einmalig. Bei jeder neuen Rechnung werden diese Informationen automatisch ausgefüllt.</li>
+            <li><strong>Fokus auf das Wesentliche:</strong> Wir haben auf unnötige Funktionen verzichtet, die den Prozess verkomplizieren. Nur das, was Sie wirklich brauchen, um schnell ans Ziel zu kommen.</li>
+        </ul>
+
+        <h2>100% Gesetzeskonform: ZUGFeRD und EN 16931</h2>
+        <p>Die größte Herausforderung der e-Rechnungspflicht ist die Einhaltung der technischen Standards. RechnungRabbit nimmt Ihnen diese Sorge vollständig ab.</p>
+        <ul>
+            <li><strong>ZUGFeRD-Integration:</strong> Jede von Ihnen erstellte PDF-Rechnung enthält automatisch eine eingebettete XML-Datei im ZUGFeRD-Format. Diese ist maschinenlesbar und erfüllt die gesetzlichen Anforderungen für die automatisierte Verarbeitung.</li>
+            <li><strong>Konform mit EN 16931:</strong> Unser System stellt sicher, dass alle Rechnungen der europäischen Norm EN 16931 entsprechen, die die Grundlage für die deutsche e-Rechnungspflicht bildet.</li>
+            <li><strong>Zukunftssicher:</strong> Wir beobachten die gesetzlichen Entwicklungen kontinuierlich und passen unsere Software an, damit Sie sich stets auf der sicheren Seite befinden.</li>
+        </ul>
+
+        <p style="margin-top: 2rem;">Mit RechnungRabbit wählen Sie nicht nur ein Werkzeug, sondern einen verlässlichen Partner, der die Komplexität der Bürokratie in eine einfache, schnelle und sichere Lösung verwandelt. <strong>Konzentrieren Sie sich auf Ihr Geschäft – wir kümmern uns um die Rechnungen.</strong></p>
+    </div>
+</div>
+{% endblock %}

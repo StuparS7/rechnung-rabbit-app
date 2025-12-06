@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+python-dotenv
+Jinja2
+supabase==2.5.0
+psycopg2-binary
+pypdf==3.17.0
+reportlab
+python-multipart

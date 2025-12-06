@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Abonnement verwalten - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 800px; margin: 2rem auto; padding: 2rem; width: 100%;}
+        h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem;}
+        .subscription-details { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .subscription-details p { font-size: 1.1rem; color: #475569; line-height: 1.6; }
+        .subscription-details .plan-name { font-weight: bold; color: #1e40af; }
+        .btn { display: inline-block; background: #3b82f6; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; margin-top: 1.5rem; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Abonnement verwalten</h1>
+
+        <div class="subscription-details">
+            <p>Ihr aktueller Plan: <strong class="plan-name">Starter</strong></p>
+            <p>Nächste Zahlung: <strong>01.01.2025</strong></p>
+            <p>Zahlungsmethode: <strong>Visa **** 4242</strong></p>
+            <a href="#" class="btn">Plan ändern</a>
+            <a href="#" class="btn" style="background-color: #ef4444;">Abonnement kündigen</a>
+        </div>
+    </div>
+{% endblock %}

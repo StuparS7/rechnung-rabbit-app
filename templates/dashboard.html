@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head_styles %}
+    <style>
+        html { scroll-behavior: smooth; } /* Adaugă derulare lină */
+        .container {max-width: 1024px; margin: 2rem auto; padding: 2rem; width: 100%;}
+        h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem;}
+        .welcome-msg { font-size: 1.2rem; color: #475569; margin-bottom: 2rem; }
+        .action-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .card { background-color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #1e40af; }
+        .card p { color: #475569; }
+        .settings-section { margin-top: 3rem; background-color: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        .section-title { font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem; margin-top: 3rem; }
+        .settings-section a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+        .invoice-list { margin-top: 3rem; }
+        .invoice-list table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); overflow: hidden; }
+        .invoice-list th, .invoice-list td { text-align: left; padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        .invoice-list th { color: #475569; font-weight: 600; }
+        .invoice-list tr:last-child td { border-bottom: none; }
+        .invoice-list .action-cell { display: flex; gap: 0.5rem; }
+        .invoice-list .download-btn { background-color: #3b82f6; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+        .invoice-list .delete-btn { background-color: #ef4444; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; border: none; cursor: pointer; font-family: system-ui, sans-serif; }
+        .invoice-list .edit-btn { background-color: #f97316; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Dashboard</h1>
+        {% if user %}
+            <p class="welcome-msg">Willkommen zurück, <strong>{{ user.email }}</strong>!</p>
+        {% endif %}
+        
+        <div class="action-cards">
+            <a href="/rechnung-erstellen" class="card">
+                <h3>Neue Rechnung</h3>
+                <p>Erstellen Sie schnell und einfach eine neue Rechnung.</p>
+            </a>
+            <a href="/rechnungen" class="card">
+                <h3>Ihre Rechnungen</h3>
+                <p>Sehen Sie alle Ihre erstellten Rechnungen an.</p>
+            </a>
+            <a href="/kunden" class="card">
+                <h3>Kunden verwalten</h3>
+                <p>Fügen Sie neue Kunden hinzu oder bearbeiten Sie bestehende.</p>
+            </a>
+            <a href="/profil" class="card">
+                <h3>Profil</h3>
+                <p>Bearbeiten Sie Ihre Firmadaten und Ihr Logo.</p>
+            </a>
+            <a href="/passwort-aendern" class="card">
+                <h3>Kontoeinstellungen</h3>
+                <p>Ändern Sie Ihr Passwort und verwalten Sie Ihr Konto.</p>
+            </a>
+            <a href="/abonnement" class="card">
+                <h3>Abonnement</h3>
+                <p>Verwalten Sie Ihr Abonnement und Ihre Zahlungsdaten.</p>
+            </a>
+        </div>
+
+    </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Preise - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        /* Am copiat stilurile pentru un aspect consistent */
+        .container {max-width: 1200px; margin: 0 auto; padding: 2rem; text-align: center;}
+        h1 {font-size: 3.5rem; color: #1e40af; margin: 2rem 0 4rem;}
+        .cards {display: flex; gap: 2rem; justify-content: center; margin: 4rem 0;} /* Am eliminat flex-wrap */
+        .card {background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 300px; text-align: left;} /* Am redus lățimea */
+        .card {display: flex; flex-direction: column;} /* Adăugat pentru aliniere verticală */
+        .card h2 { font-size: 2rem; color: #1e40af; margin-top: 0;}
+        .card .price { font-size: 3rem; font-weight: bold; margin: 1rem 0; }
+        .card .price span { font-size: 1rem; font-weight: normal; color: #64748b; }
+        .card ul { list-style: none; padding: 0; margin: 2rem 0; }
+        .card li { margin-bottom: 1rem; }
+        .card .btn { display: block; text-align: center; background: #3b82f6; color: white; padding: 1rem; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: auto;} /* Modificat margin-top */
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Wählen Sie den passenden Plan</h1>
+        <div class="cards">
+            <div class="card"><h2>Gratis</h2><div class="price">0€</div><ul><li>✓ 5 Rechnungen/Monat</li></ul><a href="#" class="btn">Kostenlos starten</a></div>
+            <div class="card"><h2>Starter</h2><div class="price">15€<span>/Monat</span></div><ul><li>✓ Unbegrenzte Rechnungen</li><li>✓ Rechnungen speichern</li><li>✓ Kundendaten speichern</li></ul><a href="#" class="btn">Starter wählen</a></div>
+            <div class="card"><h2>Pro</h2><div class="price">20€<span>/Monat</span></div><ul><li>✓ Alles aus Starter</li><li>✓ Rechnung anpassen</li><li>✓ Digitale Signatur</li></ul><a href="#" class="btn">Pro wählen</a></div>
+        </div>
+    </div>
+{% endblock %}

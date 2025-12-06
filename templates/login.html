@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Login - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 400px; margin: auto; padding: 2rem; width: 100%;}
+        h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem; text-align: center;}
+        form { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+        input[type="email"], input[type="password"] {
+            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 1rem; box-sizing: border-box; margin-bottom: 1.5rem;
+        }
+        button[type="submit"] {
+            display: block; width: 100%; background: #22c55e; color: white; 
+            padding: 1rem; font-size: 1.2rem; border-radius: 12px; text-decoration: none; 
+            font-weight: bold; border: none; cursor: pointer; margin-top: 1rem;
+        }
+        .error { background-color: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center;}
+        .switch-form { text-align: center; margin-top: 1.5rem; color: #475569; }
+        .switch-form a { color: #3b82f6; font-weight: 500; text-decoration: none; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Login</h1>
+        <form id="login-form">
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Passwort:</label>
+            <input type="password" id="password" name="password" required>
+            <button type="submit">Einloggen</button>
+        </form>
+        <p class="switch-form">Noch kein Konto? <a href="/register">Jetzt registrieren</a></p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = '{{ SUPABASE_URL }}'; // Vom injecta asta din Python mai târziu
+        const supabaseKey = '{{ SUPABASE_KEY }}'; // Vom injecta asta din Python mai târziu
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = loginForm.querySelector('#email').value;
+            const password = loginForm.querySelector('#password').value;
+            const errorDiv = loginForm.querySelector('.error');
+            if (errorDiv) errorDiv.remove();
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                loginForm.insertAdjacentHTML('afterbegin', `<div class="error">${error.message}</div>`);
+            } else {
+                // Trimite token-ul la backend pentru a seta cookie-ul
+                const response = await fetch('/auth/callback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        access_token: data.session.access_token,
+                        refresh_token: data.session.refresh_token
+                    })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                }
+            }
+        });
+    </script>
+{% endblock %}

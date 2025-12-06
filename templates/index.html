@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}RechnungRabbit – e-Rechnung 2025{% endblock %}
+
+{% block head_styles %}
+    <style>
+        /* Stiluri specifice pentru pagina principală */
+        .container {max-width: 1200px; margin: 0 auto; padding: 2rem; text-align: center;}
+        h1 {font-size: 4.5rem; color: #1e40af; margin: 2rem 0 1rem;}
+        p {font-size: 1.6rem; color: #475569; max-width: 800px; margin: 0 auto 3rem;}
+        .btn {background: #3b82f6; color: white; padding: 1.2rem 3rem; font-size: 1.5rem; border-radius: 12px; text-decoration: none; font-weight: bold;}
+        .cards {display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin: 4rem 0;}
+        .card {background: white; padding: 2.5rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 300px;}
+        .popular {border: 4px solid #3b82f6; position: relative;}
+        .popular::before {content: "Beliebt"; background: #ef4444; color: white; padding: 0.5rem 1.5rem; border-radius: 30px; position: absolute; top: -15px; left: 50%; transform: translateX(-50%);}
+    
+        /* Stiluri pentru imaginea de prezentare a facturii */
+        .invoice-muster-container {
+            margin: 5rem 0;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            display: inline-block;
+        }
+        .invoice-muster-container img {
+            max-width: 100%;
+            width: 800px;
+            border-radius: 8px;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>RechnungRabbit</h1>
+        <p>Die einfachste ZUGFeRD e-Rechnung für 2025 – ab nur 9€/Monat</p>
+        <a href="/rechnung-erstellen" class="btn">Rechnung Erstellen →</a>
+
+        <a href="/warum" style="text-decoration: none;">
+            <h2 style="color:#1e40af; margin:4rem 0 2rem 0;">Warum RechnungRabbit?</h2>
+        </a>
+        <div class="cards">
+            <div class="card"><h3>Blitzschnell</h3><p>Rechnung in unter 30 Sekunden erstellen.</p></div>
+            <div class="card"><h3>100% Konform</h3><p>ZUGFeRD & EN 16931 konform.</p></div>
+            <div class="card"><h3>Super Günstig</h3><p>Ab 9€/Monat – jederzeit kündbar.</p></div>
+        </div>
+
+        <h2 style="color:#1e40af; margin:4rem 0">So sieht Ihre Rechnung aus</h2>
+        <div class="invoice-muster-container">
+            <!-- Imaginea trebuie plasată în static/images/rechnung-muster.png -->
+            <img src="{{ url_for('static', path='images/rechnung-muster.png') }}" alt="Beispiel einer mit RechnungRabbit erstellten Rechnung">
+        </div>
+
+        <h2 style="color:#1e40af; margin:4rem 0">Preise</h2>
+        <div class="cards">
+            <div class="card"><h3>Gratis</h3><h2>0€</h2><p>5 Rechnungen/Monat</p></div>
+            <div class="card popular"><h3>Starter</h3><h2>9€/Monat</h2><p>50 Rechnungen<br>Excel Export</p></div>
+            <div class="card"><h3>Pro</h3><h2>19€/Monat</h2><p>Unbegrenzt<br>Erinnerungen<br>PEPPOL</p></div>
+        </div>
+
+        <p style="margin-top:5rem; color:#64748b;">© 2025 RechnungRabbit.de</p>
+    </div>
+{% endblock %}

@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}{% if invoice %}Rechnung bearbeiten{% else %}Neue Rechnung erstellen{% endif %} - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 1000px; margin: 0 auto; padding: 2rem; }
+        
+        /* Stiluri formular */
+        form { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h3 { font-size: 1.25rem; color: #1e40af; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+        
+        input[type="text"], input[type="date"], input[type="number"], textarea, select {
+            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 1rem; box-sizing: border-box; margin-bottom: 1rem;
+        }
+        
+        input[type="file"] {
+            width: 100%; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 0.9rem; box-sizing: border-box; margin-bottom: 1rem;
+        }
+        
+        input:disabled, select:disabled { background-color: #f3f4f6; color: #9ca3af; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        /* Tabel Produse - Grid actualizat pentru coloana TVA */
+        .line-item { 
+            display: grid; 
+            grid-template-columns: 3fr 0.8fr 1fr 0.8fr 1fr 0.2fr; 
+            gap: 0.8rem; 
+            align-items: center; 
+            margin-bottom: 1rem; 
+        }
+        
+        .line-item-header { font-weight: bold; color: #475569; font-size: 0.9rem; margin-bottom: 0.5rem; padding: 0 0.5rem; }
+        
+        .form-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem;
+            border-bottom: 1px solid #e5e7eb; padding-bottom: 1.5rem;
+        }
+        
+        .line-item input, .line-item select { margin-bottom: 0; }
+        
+        #add-item-btn {
+            background: #e0e7ff; color: #1e40af; border: 1px dashed #c7d2fe;
+            padding: 0.75rem; border-radius: 8px; cursor: pointer; text-align: center;
+            font-weight: 500; margin-bottom: 2rem;
+        }
+        
+        .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+        .totals { margin-left: auto; width: 300px; }
+        .totals .total-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 1.1rem; }
+        .totals .total-row.grand-total { font-weight: bold; font-size: 1.3rem; color: #1e40af; border-top: 2px solid #e5e7eb; padding-top: 0.5rem; margin-top: 0.5rem;}
+        
+        .remove-item-btn { background: none; border: none; color: #ef4444; font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; }
+        
+        button[type="submit"] {
+            display: block; width: 100%; background: #22c55e; color: white; 
+            padding: 1rem; font-size: 1.2rem; border-radius: 12px; text-decoration: none; 
+            font-weight: bold; border: none; cursor: pointer; margin-top: 2rem;
+        }
+
+        /* Kleinunternehmer Box */
+        .small-business-box {
+            background: #f0f9ff; border: 1px solid #bae6fd; padding: 1rem; 
+            border-radius: 8px; margin-bottom: 1rem;
+        }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; }
+        .checkbox-wrapper input { width: auto; margin: 0; }
+        
+        /* Legal Details Box */
+        details { background: #f8fafc; padding: 0.5rem; border-radius: 8px; border: 1px solid #e2e8f0; margin-top: 1rem; }
+        summary { font-weight: 500; color: #475569; cursor: pointer; }
+        .legal-details-content { margin-top: 1rem; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{% if invoice %}Rechnung bearbeiten{% else %}Neue Rechnung erstellen{% endif %}</h1>
+        
+        <form id="invoice-form" action="/rechnung-erstellen" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="invoice_id" value="{{ invoice.id if invoice else '' }}">
+            
+            <div class="form-grid">
+                <div style="padding-right: 2.5rem; border-right: 1px solid #e5e7eb;">
+                    <h3>Rechnungssteller (Ihre Daten)</h3>
+                    
+                    <div class="small-business-box">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="is_small_business" name="is_small_business" value="true" 
+                                   {% if profile and profile.is_small_business %}checked{% endif %} 
+                                   onchange="toggleSmallBusiness()">
+                            <label for="is_small_business" style="margin:0;">Kleinunternehmer (§ 19 UStG)</label>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; margin-bottom: 0;">
+                            Keine Umsatzsteuer wird berechnet.
+                        </p>
+                    </div>
+
+                    <label for="logo">Firmenlogo (optional):</label>
+                    <input type="file" id="logo" name="logo" accept="image/*">
+
+                    <label for="sender_name">Name / Firma:</label>
+                    <input type="text" id="sender_name" name="sender_name" placeholder="Ihre Firma GmbH" value="{{ profile.sender_name if profile else '' }}">
+                    
+                    <label for="sender_address">Straße und Hausnummer:</label>
+                    <input type="text" id="sender_address" name="sender_address" placeholder="Musterstraße 123" value="{{ profile.sender_address if profile else '' }}">
+                    
+                    <div class="form-row">
+                        <div>
+                            <label for="sender_zip">PLZ:</label>
+                            <input type="text" id="sender_zip" name="sender_zip" placeholder="12345" value="{{ profile.sender_zip if profile else '' }}">
+                        </div>
+                        <div>
+                            <label for="sender_city">Ort:</label>
+                            <input type="text" id="sender_city" name="sender_city" placeholder="Musterstadt" value="{{ profile.sender_city if profile else '' }}">
+                        </div>
+                    </div>
+
+                    <label for="sender_tax_id">Steuernummer (Pflicht):</label>
+                    <input type="text" id="sender_tax_id" name="sender_tax_id" placeholder="12/345/67890" value="{{ profile.sender_tax_id if profile else '' }}">
+                    
+                    <label for="sender_vat_id">USt-IdNr. (Optional / EU):</label>
+                    <input type="text" id="sender_vat_id" name="sender_vat_id" placeholder="DE123456789" value="{{ profile.sender_vat_id if profile else '' }}">
+
+                    <label for="sender_iban">IBAN:</label>
+                    <input type="text" id="sender_iban" name="sender_iban" placeholder="DE89..." value="{{ profile.iban if profile else '' }}">
+
+                    <details>
+                        <summary>Handelsregister & Geschäftsführer (für GmbH/UG)</summary>
+                        <div class="legal-details-content">
+                            <label for="register_court">Amtsgericht:</label>
+                            <input type="text" id="register_court" name="register_court" placeholder="z.B. Berlin-Charlottenburg" value="{{ profile.register_court if profile else '' }}">
+                            
+                            <label for="register_number">HRB Nummer:</label>
+                            <input type="text" id="register_number" name="register_number" placeholder="z.B. HRB 12345 B" value="{{ profile.register_number if profile else '' }}">
+                            
+                            <label for="managing_director">Geschäftsführer:</label>
+                            <input type="text" id="managing_director" name="managing_director" placeholder="Vorname Nachname" value="{{ profile.managing_director if profile else '' }}">
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <h3>Rechnungsempfänger (Kundendaten)</h3>
+                    {% if clients %}
+                    <label for="client_select">Kunden auswählen:</label>
+                    <select id="client_select" name="client_select" class="form-control">
+                        <option value="" data-name="" data-address="" data-plz="" data-stadt="">-- Neuen Kunden eingeben --</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}"
+                                {% if invoice and invoice.client_id == client.id %}selected{% endif %}
+                                data-name="{{ client.name }}"
+                                data-address="{{ client.address }}"
+                                data-plz="{{ client.zip_code }}"
+                                data-stadt="{{ client.city }}">
+                            {{ client.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+
+                    <label for="receiver_name">Name / Firma des Kunden:</label>
+                    <input type="text" id="receiver_name" name="receiver_name" placeholder="Kundenfirma AG" value="{{ invoice.client.name if invoice and invoice.client else '' }}" autocomplete="off">
+                    
+                    <label for="receiver_address">Straße und Hausnummer:</label>
+                    <input type="text" id="receiver_address" name="receiver_address" placeholder="Kundenstraße 45" value="{{ invoice.client.address if invoice and invoice.client else '' }}" autocomplete="off">
+                    
+                    <div class="form-row">
+                        <div>
+                            <label for="receiver_zip">PLZ:</label>
+                            <input type="text" id="receiver_zip" name="receiver_zip" placeholder="54321" value="{{ invoice.client.zip_code if invoice and invoice.client else '' }}" autocomplete="off">
+                        </div>
+                        <div>
+                            <label for="receiver_city">Ort:</label>
+                            <input type="text" id="receiver_city" name="receiver_city" placeholder="Kundenstadt" value="{{ invoice.client.city if invoice and invoice.client else '' }}" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- Adăugăm checkbox-ul pentru salvarea clientului -->
+                    <div id="save-client-wrapper" class="checkbox-wrapper" style="margin-top: 1rem;">
+                        <input type="checkbox" id="save_client" name="save_client" value="true">
+                        <label for="save_client" style="margin:0; font-weight: normal;">
+                            Neuen Kunden für zukünftige Rechnungen speichern
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Rechnungsdetails</h3>
+            <div class="form-row">
+                <div>
+                    <label for="invoice_number">Rechnungsnummer:</label>
+                    <input type="text" id="invoice_number" name="invoice_number" placeholder="RE-2025-001" value="{{ invoice.invoice_number if invoice else '' }}">
+                </div>
+                <div>
+                    <label for="invoice_date">Rechnungsdatum:</label>
+                    <input type="date" id="invoice_date" name="invoice_date">
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="delivery_date">Liefer-/Leistungsdatum:</label>
+                    <input type="date" id="delivery_date" name="delivery_date">
+                </div>
+                <div>
+                    <label for="due_date">Fälligkeitsdatum:</label>
+                    <input type="date" id="due_date" name="due_date">
+                </div>
+            </div>
+
+            <h3>Rechnungspositionen</h3>
+            <div class="line-item line-item-header">
+                <div>Beschreibung</div>
+                <div style="text-align: right;">Menge</div>
+                <div>Einzelpreis (€)</div>
+                <div>MwSt (%)</div> <div>Gesamt (€)</div>
+                <div></div>
+            </div>
+            <div id="line-items-container"></div>
+            <div id="add-item-btn" role="button">Position hinzufügen +</div>
+
+            <div class="totals-grid">
+                <div>
+                    <label for="notes">Anmerkungen / Zahlungsbedingungen:</label>
+                    <textarea id="notes" name="notes" rows="4">{{ invoice.notes if invoice else 'Zahlbar innerhalb von 14 Tagen ohne Abzug.' }}</textarea>
+                </div>
+                <div class="totals">
+                    <div class="total-row"><span>Netto</span><span id="total-net">0.00 €</span></div>
+                    <div class="total-row"><span>Umsatzsteuer</span><span id="total-vat">0.00 €</span></div>
+                    <div class="total-row grand-total"><span>Gesamtbetrag</span><span id="total-gross">0.00 €</span></div>
+                </div>
+            </div>
+            
+            <button type="submit" id="submit-btn">Rechnung generieren & Herunterladen</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        (function() { // IIFE pentru a proteja scope-ul variabilelor
+            let itemIndex = 0;
+
+            // --- DATE DEFAULTS ---
+            if (!document.getElementById('invoice_date').value) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('invoice_date').value = today;
+                document.getElementById('delivery_date').value = today;
+                
+                // Due date +14 days default
+                const due = new Date();
+                due.setDate(due.getDate() + 14);
+                document.getElementById('due_date').value = due.toISOString().split('T')[0];
+            }
+
+            // --- MAIN FUNCTIONS ---
+            function addLineItem(data = {}) {
+                const container = document.getElementById('line-items-container');
+                const smallBusinessCheckbox = document.getElementById('is_small_business');
+                const index = itemIndex++;
+                const isSB = smallBusinessCheckbox.checked;
+                
+                const desc = data.description || '';
+                const qty = data.quantity || 1;
+                const price = data.unit_price || '';
+                // Default VAT 19%, dar 0 dacă e Kleinunternehmer. Folosim data.vat_rate de la item-ul existent.
+                let vat_rate = data.vat_rate !== undefined ? data.vat_rate : '19';
+                if (isSB) vat_rate = '0';
+
+                const html = `
+                    <div class="line-item" data-index="${index}">
+                        <input type="text" name="items[${index}][description]" placeholder="Produkt" value="${desc}">
+                        
+                        <input type="number" name="items[${index}][quantity]" value="${qty}" min="0" step="any" class="quantity" oninput="calculateTotals()">
+                        
+                        <input type="number" name="items[${index}][unit_price]" value="${price}" placeholder="0.00" min="0" step="0.01" class="unit-price" oninput="calculateTotals()">
+                        
+                        <select name="items[${index}][vat_rate]" class="vat-rate" onchange="calculateTotals()" ${isSB ? 'disabled' : ''}>
+                            <option value="19" ${vat_rate == '19' ? 'selected' : ''}>19%</option>
+                            <option value="7" ${vat_rate == '7' ? 'selected' : ''}>7%</option>
+                            <option value="0" ${vat_rate == '0' ? 'selected' : ''}>0%</option>
+                        </select>
+                        
+                        <span class="line-total" style="text-align: right; padding-right: 0.5rem; color: #475569;">0.00 €</span>
+                        
+                        <button type="button" class="remove-item-btn" onclick="removeLine(this)">&times;</button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+                calculateTotals();
+            }
+
+            window.removeLine = function(btn) {
+                btn.closest('.line-item').remove();
+                calculateTotals();
+            }
+
+            window.calculateTotals = function() {
+                let totalNet = 0;
+                let totalVat = 0;
+                const smallBusinessCheckbox = document.getElementById('is_small_business');
+                const isSB = smallBusinessCheckbox.checked;
+
+                // Corecție: Căutăm doar în container pentru a evita selectarea antetului.
+                document.querySelectorAll('#line-items-container .line-item').forEach(row => {
+                    const qty = parseFloat(row.querySelector('.quantity').value) || 0;
+                    const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+                    
+                    let vatRate = 0;
+                    const vatSelect = row.querySelector('.vat-rate');
+                    
+                    if (isSB) {
+                        vatRate = 0;
+                        vatSelect.value = "0"; // Force visual update
+                    } else {
+                        vatRate = parseFloat(vatSelect.value) || 0;
+                    }
+
+                    const lineNet = qty * price;
+                    const lineVat = lineNet * (vatRate / 100);
+                    
+                    // Corecție: Folosim textContent pentru span, nu value
+                    row.querySelector('.line-total').textContent = (lineNet + lineVat).toFixed(2) + ' €';
+
+                    totalNet += lineNet;
+                    totalVat += lineVat;
+                });
+
+                const totalGross = totalNet + totalVat;
+
+                document.getElementById('total-net').textContent = totalNet.toFixed(2) + ' €';
+                document.getElementById('total-vat').textContent = totalVat.toFixed(2) + ' €';
+                document.getElementById('total-gross').textContent = totalGross.toFixed(2) + ' €';
+            }
+
+            // Toggle Small Business
+            window.toggleSmallBusiness = function() {
+                const smallBusinessCheckbox = document.getElementById('is_small_business');
+                const isChecked = smallBusinessCheckbox.checked;
+                document.querySelectorAll('.vat-rate').forEach(select => {
+                    select.disabled = isChecked;
+                    if (isChecked) select.value = "0";
+                    else select.value = "19"; // Reset to standard when unchecked
+                });
+                calculateTotals();
+            }
+
+            // --- CLIENT AUTO-POPULATE LOGIC ---
+            const clientSelect = document.getElementById('client_select');
+            const saveClientWrapper = document.getElementById('save-client-wrapper');
+        
+            // Elementele formularului pentru client
+            const nameField = document.getElementById('receiver_name');
+            const addressField = document.getElementById('receiver_address');
+            const zipField = document.getElementById('receiver_zip');
+            const cityField = document.getElementById('receiver_city');
+        
+            function updateClientFields() {
+                if (!clientSelect) return; // Nu face nimic dacă nu există dropdown
+        
+                const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+                const isClientSelected = selectedOption.value !== "";
+        
+                if (isClientSelected) {
+                    // CAZ 1: Client existent selectat -> Copiem datele din atributele data-*
+                    nameField.value = selectedOption.dataset.name || '';
+                    addressField.value = selectedOption.dataset.address || '';
+                    zipField.value = selectedOption.dataset.plz || '';
+                    cityField.value = selectedOption.dataset.stadt || '';
+
+                    nameField.readOnly = true;
+                    addressField.readOnly = true;
+                    zipField.readOnly = true;
+                    cityField.readOnly = true;
+                    
+                    if(saveClientWrapper) saveClientWrapper.style.display = 'none';
+                } else {
+                    // CAZ 2: "Client Nou" selectat -> Golim câmpurile pentru a permite introducerea manuală
+                    nameField.value = "";
+                    addressField.value = "";
+                    zipField.value = "";
+                    cityField.value = "";
+        
+                    nameField.readOnly = false;
+                    addressField.readOnly = false;
+                    zipField.readOnly = false;
+                    cityField.readOnly = false;
+
+                    if (saveClientWrapper) saveClientWrapper.style.display = 'flex';
+                }
+            }
+
+            // --- INIT & EVENT LISTENERS ---
+            document.getElementById('add-item-btn').addEventListener('click', () => addLineItem());
+            
+            if (clientSelect) {
+                clientSelect.addEventListener('change', updateClientFields);
+            }
+            
+            // Inițializarea listei de articole (se mută aici pentru a fi în ordine)
+            const existingItemsJSON = '{{ invoice.line_items | tojson | safe if invoice and invoice.line_items else "[]" }}';
+            const existingItems = JSON.parse(existingItemsJSON);
+            if (existingItems.length > 0) {
+                existingItems.forEach(item => addLineItem(item));
+            } else {
+                addLineItem(); // Adaugă un rând gol dacă nu edităm
+            }
+
+            updateClientFields();
+
+            const form = document.getElementById('invoice-form');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const submitBtn = document.getElementById('submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Wird verarbeitet...';
+
+                // Activăm temporar select-urile de TVA pentru a fi incluse în FormData
+                document.querySelectorAll('.vat-rate').forEach(s => s.disabled = false);
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('/rechnung-erstellen', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        // Tratăm răspunsul ca pe un fișier (blob) pentru descărcare
+                        const blob = await response.blob();
+                        const contentDisposition = response.headers.get('content-disposition');
+                        let filename = 'rechnung.pdf';
+                        if (contentDisposition) {
+                            const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                            if (filenameMatch && filenameMatch.length > 1) filename = filenameMatch[1];
+                        }
+
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        // După succes, redirecționăm către dashboard
+                        location.reload();
+                    } else {
+                        alert('Fehler beim Erstellen der Rechnung.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Netzwerkfehler.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Rechnung generieren & Herunterladen';
+                    // Readucem starea inițială a checkbox-ului de Kleinunternehmer
+                    toggleSmallBusiness(); 
+                }
+            });
+        })(); // Sfârșitul IIFE
+    </script>
+{% endblock %}

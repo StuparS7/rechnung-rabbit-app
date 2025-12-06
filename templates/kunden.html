@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Kunden - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 1000px; margin: 2rem auto; padding: 2rem;}
+        h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 1rem;}
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start; }
+        .card { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
+        h2 { font-size: 1.5rem; color: #1e40af; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;}
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f9fafb; color: #475569; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+
+        .delete-btn {
+            background-color: #fee2e2; color: #b91c1c; border: none;
+            padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;
+            font-size: 0.8rem; font-weight: 500;
+        }
+        .delete-btn:hover { background-color: #fecaca; }
+
+        label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+        input[type="text"] {
+            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 1rem; box-sizing: border-box; margin-bottom: 1rem;
+        }
+        button[type="submit"] {
+            display: block; width: 100%; background: #22c55e; color: white; 
+            padding: 0.75rem; font-size: 1rem; border-radius: 8px;
+            font-weight: bold; border: none; cursor: pointer; margin-top: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Kunden verwalten</h1>
+    <div class="grid">
+        <div class="card">
+            <h2>Ihre Kunden</h2>
+            {% if clients %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Adresse</th>
+                        <th>Stadt</th>
+                        <th>PLZ</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                    <tr>
+                        <td>{{ client.name }}</td>
+                        <td>{{ client.address }}</td>
+                        <td>{{ client.city }}</td>
+                        <td>{{ client.zip_code }}</td>
+                        <td>
+                            <form action="/kunden/delete/{{ client.id }}" method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Kunden löschen möchten? Es können keine Rechnungen mit ihm verknüpft sein.');">
+                                <button type="submit" class="delete-btn">Löschen</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>Sie haben noch keine Kunden hinzugefügt.</p>
+            {% endif %}
+        </div>
+        <div class="card">
+            <h2>Neuen Kunden hinzufügen</h2>
+            <form action="/kunden" method="post">
+                <label for="name">Name / Firma:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="address">Adresse:</label>
+                <input type="text" id="address" name="address" required>
+                <label for="zip_code">PLZ:</label>
+                <input type="text" id="zip_code" name="zip_code" required>
+                <label for="city">Stadt:</label>
+                <input type="text" id="city" name="city" required>
+                <button type="submit">Kunden speichern</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Ihre Rechnungen - {{ super() }}{% endblock %}
+
+{% block head_styles %}
+    <style>
+        .container {max-width: 1024px; margin: 2rem auto; padding: 2rem; width: 100%;}
+        .section-title { font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem; }
+        .invoice-list table { width: 100%; border-collapse: collapse; background-color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); overflow: hidden; }
+        .invoice-list th, .invoice-list td { text-align: left; padding: 1rem; border-bottom: 1px solid #e5e7eb; }
+        .invoice-list th { color: #475569; font-weight: 600; }
+        .invoice-list tr:last-child td { border-bottom: none; }
+        .invoice-list .action-cell { display: flex; gap: 0.5rem; }
+        .invoice-list .download-btn { background-color: #3b82f6; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+        .invoice-list .delete-btn { background-color: #ef4444; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; border: none; cursor: pointer; font-family: system-ui, sans-serif; }
+        .invoice-list .edit-btn { background-color: #f97316; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; text-decoration: none; font-size: 0.9rem; }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="section-title">Ihre Rechnungen</h2>
+    <div class="invoice-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Rechnungsnr.</th>
+                    <th>Datum</th>
+                    <th>Betrag</th>
+                    <th>Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>{{ invoice.invoice_number }}</td>
+                    <td>{{ invoice.invoice_date.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ "%.2f"|format(invoice.total_amount) }} €</td>
+                    <td class="action-cell">
+                        <a href="{{ url_for('static', path=invoice.pdf_file_path) }}" class="download-btn" target="_blank">Anzeigen</a>
+                        <a href="/rechnung-bearbeiten/{{ invoice.id }}" class="edit-btn">Bearbeiten</a>
+                        <form action="/invoice/delete/{{ invoice.id }}" method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie diese Rechnung endgültig löschen möchten?');">
+                            <button type="submit" class="delete-btn">Löschen</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align: center; padding: 2rem;">Sie haben noch keine Rechnungen erstellt.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

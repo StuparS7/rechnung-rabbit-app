@@ -1,0 +1,75 @@
+{% extends "dashboard_base.html" %}
+
+{% block title %}Passwort ändern{% endblock %}
+
+{% block head_styles %}
+<style>
+    .container {max-width: 600px; margin: 2rem auto; padding: 2rem; width: 100%;}
+    h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 2rem;}
+    form { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+    label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+    input[type="password"] {
+        width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+        font-size: 1rem; box-sizing: border-box; margin-bottom: 1.5rem;
+    }
+    button[type="submit"] {
+        display: inline-block; background: #22c55e; color: white; 
+        padding: 0.75rem 1.5rem; font-size: 1rem; border-radius: 8px; text-decoration: none; 
+        font-weight: bold; border: none; cursor: pointer; margin-top: 1rem;
+    }
+    .message { padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; }
+    .success { background-color: #dcfce7; color: #166534; }
+    .error { background-color: #fee2e2; color: #b91c1c; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Passwort ändern</h1>
+
+    <form id="password-change-form">
+        <div id="message-container"></div>
+
+        <label for="new_password">Neues Passwort:</label>
+        <input type="password" id="new_password" name="new_password" required minlength="6">
+
+        <label for="confirm_password">Neues Passwort bestätigen:</label>
+        <input type="password" id="confirm_password" name="confirm_password" required minlength="6">
+
+        <button type="submit">Passwort speichern</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('password-change-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const messageContainer = document.getElementById('message-container');
+        messageContainer.innerHTML = '';
+
+        if (newPassword !== confirmPassword) {
+            messageContainer.innerHTML = `<div class="message error">Die Passwörter stimmen nicht überein.</div>`;
+            return;
+        }
+
+        const response = await fetch('/passwort-aendern', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ new_password: newPassword })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            messageContainer.innerHTML = `<div class="message success">${result.message}</div>`;
+            event.target.reset(); // Golește formularul
+        } else {
+            messageContainer.innerHTML = `<div class="message error">${result.detail || 'Ein Fehler ist aufgetreten.'}</div>`;
+        }
+    });
+</script>
+{% endblock %}
