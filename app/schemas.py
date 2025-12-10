@@ -1,12 +1,13 @@
 from pydantic import BaseModel, EmailStr
 from typing import List, Optional
 from datetime import date
+from decimal import Decimal
 
 class LineItemBase(BaseModel):
     description: str
-    quantity: float
-    unit_price: float
-    vat_rate: Optional[float] = None
+    quantity: Decimal
+    unit_price: Decimal
+    vat_rate: Optional[Decimal] = None
 
 class LineItemCreate(LineItemBase):
     pass
@@ -42,7 +43,7 @@ class CompanyProfile(CompanyProfileBase):
 class InvoiceBase(BaseModel):
     invoice_number: str
     invoice_date: date
-    total_amount: float
+    total_amount: Decimal
     pdf_file_path: str
 
 class InvoiceCreate(InvoiceBase):
@@ -63,6 +64,8 @@ class ClientBase(BaseModel):
     address: str
     zip_code: str
     city: str
+    leitweg_id: Optional[str] = None
+    vat_id: Optional[str] = None
 
 class ClientCreate(ClientBase):
     pass

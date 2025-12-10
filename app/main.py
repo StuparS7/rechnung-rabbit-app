@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 import uuid
 from contextlib import asynccontextmanager
+from decimal import Decimal
 from sqlalchemy.orm import Session 
 from datetime import datetime
 
@@ -23,6 +24,15 @@ async def lifespan(app: FastAPI):
 # Creează tabelele în baza de date la pornire
 models.Base.metadata.create_all(bind=engine)
 
+# --- JSON Encoder personalizat pentru a gestiona tipul Decimal ---
+from json import JSONEncoder
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj) # Convertim în float doar pentru afișare JSON, calculele rămân precise
+        return JSONEncoder.default(self, obj)
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(os.path.dirname(BASE_DIR), "static")
 INVOICES_DIR = os.path.join(STATIC_DIR, "invoices")
@@ -34,6 +44,9 @@ os.makedirs(INVOICES_DIR, exist_ok=True)
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# Suprascrie encoder-ul JSON implicit al FastAPI
+app.json_encoder = CustomJSONEncoder
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
 @app.middleware("http")
@@ -195,14 +208,52 @@ async def update_profile_page(
 
 @app.get("/kunden", response_class=HTMLResponse)
 async def get_clients_page(request: Request, db: Session = Depends(get_db), user: supabase_client.User = Depends(get_current_user)):
-    clients = crud.get_clients_by_owner(db, owner_id=user.id)
-    return templates.TemplateResponse("kunden.html", {"request": request, "user": user, "clients": clients})
+    db_clients = crud.get_clients_by_owner(db, owner_id=user.id)
+    # Convertim obiectele SQLAlchemy în modele Pydantic, apoi în dicționare.
+    # Jinja2-ul `tojson` va gestiona corect conversia în obiecte JavaScript.
+    clients_data = [schemas.Client.from_orm(client).model_dump() for client in db_clients]
+    return templates.TemplateResponse("kunden.html", {"request": request, "user": user, "clients": clients_data})
 
 @app.post("/kunden", response_class=HTMLResponse)
-async def create_new_client(request: Request, db: Session = Depends(get_db), user: supabase_client.User = Depends(get_current_user), name: str = Form(...), address: str = Form(...), zip_code: str = Form(...), city: str = Form(...)):
-    client_data = schemas.ClientCreate(name=name, address=address, zip_code=zip_code, city=city)
+async def create_new_client(
+    request: Request, 
+    db: Session = Depends(get_db), 
+    user: supabase_client.User = Depends(get_current_user), 
+    name: str = Form(...), 
+    address: str = Form(...), 
+    zip_code: str = Form(...), 
+    city: str = Form(...),
+    vat_id: Optional[str] = Form(None),
+    leitweg_id: Optional[str] = Form(None)
+):
+    client_data = schemas.ClientCreate(name=name, address=address, zip_code=zip_code, city=city, vat_id=vat_id, leitweg_id=leitweg_id)
     crud.create_client(db, client=client_data, owner_id=user.id)
     # Redirecționează înapoi la pagina de clienți pentru a vedea noul client în listă
+    return RedirectResponse(url="/kunden", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/kunden/edit/{client_id}")
+async def edit_client_route(
+    client_id: int,
+    db: Session = Depends(get_db),
+    user: supabase_client.User = Depends(get_current_user),
+    name: str = Form(...), 
+    address: str = Form(...), 
+    zip_code: str = Form(...), 
+    city: str = Form(...),
+    vat_id: Optional[str] = Form(None),
+    leitweg_id: Optional[str] = Form(None)
+):
+    client_data = schemas.ClientCreate(
+        name=name, 
+        address=address, 
+        zip_code=zip_code, 
+        city=city,
+        vat_id=vat_id if vat_id and vat_id.strip() else None,
+        leitweg_id=leitweg_id if leitweg_id and leitweg_id.strip() else None
+    )
+    updated_client = crud.update_client(db, client_id=client_id, client_data=client_data, owner_id=user.id)
+    if not updated_client:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
     return RedirectResponse(url="/kunden", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/kunden/delete/{client_id}")
@@ -332,9 +383,10 @@ async def create_rechnung(
     for index in sorted(item_data.keys()):
         # Asigură-te că valorile numerice sunt convertite corect
         # Tratează string-urile goale ca 0.0
-        item = item_data[index]
-        item['quantity'] = float(item.get('quantity') or 0)
-        item['unit_price'] = float(item.get('unit_price') or 0)
+        item = item_data[index] # item este un dicționar
+        item['quantity'] = Decimal(item.get('quantity') or '0')
+        item['unit_price'] = Decimal(item.get('unit_price') or '0')
+        item['vat_rate'] = Decimal(item.get('vat_rate') or '0')
         items.append(item_data[index])
 
     # Folosește logo-ul salvat în profilul utilizatorului, dacă există
@@ -349,6 +401,16 @@ async def create_rechnung(
     # Adaugă IBAN-ul din profil în datele formularului dacă nu este deja prezent
     if 'sender_iban' not in form_data_dict and company_profile and company_profile.iban:
         form_data_dict['sender_iban'] = company_profile.iban
+
+    # Adaugă USt-IdNr. din profil în datele formularului
+    if 'sender_vat_id' not in form_data_dict and company_profile and company_profile.sender_vat_id:
+        form_data_dict['sender_vat_id'] = company_profile.sender_vat_id
+
+    # Adaugă Leitweg-ID din datele clientului, dacă a fost selectat unul
+    if client_id:
+        client = crud.get_client(db, client_id=client_id, owner_id=user.id)
+        if client and client.leitweg_id:
+            form_data_dict['leitweg_id'] = client.leitweg_id
 
     # Generează PDF-ul în memorie
     pdf_buffer = generate_invoice_pdf(form_data_dict, items, absolute_logo_path)
@@ -372,15 +434,15 @@ async def create_rechnung(
         f.write(pdf_buffer.getvalue())
 
     # Calculează totalul brut pentru a-l salva în DB, luând în considerare TVA-ul per articol
-    total_netto = 0.0
-    total_vat = 0.0
+    total_netto = Decimal("0.0")
+    total_vat = Decimal("0.0")
     for item in items:
-        quantity = float(item.get("quantity") or 0)
-        unit_price = float(item.get("unit_price") or 0)
-        vat_rate = float(item.get("vat_rate") or 0)
+        quantity = Decimal(str(item.get("quantity") or "0"))
+        unit_price = Decimal(str(item.get("unit_price") or "0"))
+        vat_rate = Decimal(str(item.get("vat_rate") or "0"))
         line_netto = quantity * unit_price
         total_netto += line_netto
-        total_vat += line_netto * (vat_rate / 100.0)
+        total_vat += line_netto * (vat_rate / Decimal("100.0"))
     
     total_brutto = total_netto + total_vat
 
@@ -392,7 +454,7 @@ async def create_rechnung(
     invoice_data = schemas.InvoiceCreate(
         invoice_number=form_data_dict.get("invoice_number", "N/A"),
         invoice_date=invoice_date_obj,
-        total_amount=round(total_brutto, 2),
+        total_amount=total_brutto,
         pdf_file_path=f"invoices/{pdf_filename}" # Folosim slash pentru a asigura compatibilitatea URL
     ) # Am scos line_items de aici, le vom gestiona separat
 

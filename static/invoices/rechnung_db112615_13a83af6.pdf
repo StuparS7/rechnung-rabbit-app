@@ -1,0 +1,152 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<<
+/Type /Pages
+/Count 1
+/Kids [ 4 0 R ]
+>>
+endobj
+2 0 obj
+<<
+/Producer (pypdf)
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/Metadata 9 0 R
+/Names <<
+/EmbeddedFiles <<
+/Names [ (factur\055x\056xml) 11 0 R ]
+>>
+>>
+/AF [ 11 0 R ]
+>>
+endobj
+4 0 obj
+<<
+/Contents 5 0 R
+/MediaBox [ 0 0 595.2756 841.8898 ]
+/Resources <<
+/Font 6 0 R
+/ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>>
+/Rotate 0
+/Trans <<
+>>
+/Type /Page
+/Parent 1 0 R
+>>
+endobj
+5 0 obj
+<<
+/Filter [ /ASCII85Decode /FlateDecode ]
+/Length 825
+>>
+stream
+Gat=)>>O!-'RoMS30,(`NI?1IGQS86-8l0rVhpbKQo<<EOg^atYMX?&:7<pr\W(*kmlOSm7f]G1b3(M^\4GQM8q9/t*^M3O+M!'HAF_d\-'9"^bd@8Aet<I.0uh&Q1*\M,`Pnk9$XRSf"24e=0aK12Y<4Kh8N0&Xb']rtVWW6eMW]E%E]KZ,O84)hn(WPC8FoilHhIc/Vp99Q:13?qMg5>;T"AGph^m^;92<;i1A?*$f"$G)`S5j\8hs8bd9@N[Z`":jQ&7)a^#ZUCY@B"90kXC)3u4J="2l\)-9l@#hKn+rGS("2X\"Gl,,pOQ5(smL?P#uqU_JDLJparUI-@;P^BSn"\^#WWo6j*Y(hVPBCfqeR@D:K/"7-_`URhd^nYh]E\MpL7FN&_@YO85bRn^J?G3SEJQ4X?j&'M+(kM/VTQ<pAHWamh7/SYa=.a@"0ArX&.rm9grZUd3r4DuPj-lb@@O@DHp[RH:-"$/&mGi?*SFlCaPV(_<mJ>*WLLe'@]YDudo*%IdmEMR+I]hJ#V\+rV\\)RT;/E8-_Dm%o>T'ZSqf]\mpPQjI8fXI0?='#F"r%mMTO.7;sDNH"fn7-,6.$'`1E><X-&2Zb<(*'m!\rJ0X@TYP"&u:Pa-$f%]dr0-5HT>j]SFr^a3tER;*'4q05L]'BQ1q&:*selb5YA&&(K=E-/ulY\i0nHmc+b2uR\B'V+66q_#6^p=d/Rgs1`*D/0V%U78HcetcHP#!Ur<PPQhsqiqm>SSo*uX'7eG&m:j8ZN\#WO^;:dD`jmB(s:)A!%EM`MD<Qg/!'-3_Ao;`%i\c+;!j:<F2\XW~>
+endstream
+endobj
+6 0 obj
+<<
+/F1 7 0 R
+/F2 8 0 R
+>>
+endobj
+7 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+8 0 obj
+<<
+/BaseFont /Helvetica-Bold
+/Encoding /WinAnsiEncoding
+/Name /F2
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+9 0 obj
+<<
+/Type /Metadata
+/Subtype /XML
+/Length 984
+>>
+stream
+<?xpacket begin="Ôªø" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about="" xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
+      <pdfaid:part>3</pdfaid:part>
+      <pdfaid:conformance>B</pdfaid:conformance>
+    </rdf:Description>
+    <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
+      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">Rechnung </rdf:li></rdf:Alt></dc:title>
+      <dc:creator><rdf:Seq><rdf:li></rdf:li></rdf:Seq></dc:creator>
+    </rdf:Description>
+    <rdf:Description rdf:about="" xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
+      <fx:DocumentType>INVOICE</fx:DocumentType>
+      <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
+      <fx:Version>1.0</fx:Version> 
+      <fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>
+endstream
+endobj
+10 0 obj
+<<
+/Type /EmbeddedFile
+/Subtype /text#2Fxml
+/Params <<
+/ModDate (D\07220251209001317\05300\04700\047)
+>>
+/Length 2995
+>>
+stream
+<?xml version='1.0' encoding='UTF-8'?>
+<rsm:CrossIndustryInvoice xmlns:ram="urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100" xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100" xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100"><rsm:ExchangedDocumentContext><ram:GuidelineSpecifiedDocumentContextParameter><ram:ID>urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_2.2</ram:ID></ram:GuidelineSpecifiedDocumentContextParameter></rsm:ExchangedDocumentContext><rsm:ExchangedDocument><ram:ID /><ram:TypeCode>380</ram:TypeCode><ram:IssueDateTime><udt:DateTimeString format="102">20251208</udt:DateTimeString></ram:IssueDateTime></rsm:ExchangedDocument><rsm:SupplyChainTradeTransaction><ram:IncludedSupplyChainTradeLineItem><ram:AssociatedDocumentLineDocument><ram:LineID>1</ram:LineID></ram:AssociatedDocumentLineDocument><ram:SpecifiedTradeProduct><ram:Name /></ram:SpecifiedTradeProduct><ram:SpecifiedLineTradeDelivery><ram:BilledQuantity unitCode="C62">1.0000</ram:BilledQuantity></ram:SpecifiedLineTradeDelivery><ram:SpecifiedLineTradeSettlement><ram:ApplicableTradeTax><ram:TypeCode>VAT</ram:TypeCode><ram:CategoryCode>S</ram:CategoryCode><ram:RateApplicablePercent>19.00</ram:RateApplicablePercent></ram:ApplicableTradeTax><ram:SpecifiedTradeSettlementLineMonetarySummation><ram:LineTotalAmount>0.00</ram:LineTotalAmount></ram:SpecifiedTradeSettlementLineMonetarySummation></ram:SpecifiedLineTradeSettlement><ram:SpecifiedLineTradeAgreement><ram:NetPriceProductTradePrice><ram:ChargeAmount>0.0000</ram:ChargeAmount></ram:NetPriceProductTradePrice></ram:SpecifiedLineTradeAgreement></ram:IncludedSupplyChainTradeLineItem><ram:ApplicableHeaderTradeAgreement><ram:SellerTradeParty><ram:Name /><ram:PostalTradeAddress><ram:PostcodeCode /><ram:LineOne /><ram:CityName /><ram:CountryID>DE</ram:CountryID></ram:PostalTradeAddress></ram:SellerTradeParty><ram:BuyerTradeParty><ram:Name /><ram:PostalTradeAddress><ram:PostcodeCode /><ram:LineOne /><ram:CityName /><ram:CountryID>DE</ram:CountryID></ram:PostalTradeAddress></ram:BuyerTradeParty></ram:ApplicableHeaderTradeAgreement><ram:ApplicableHeaderTradeSettlement><ram:InvoiceCurrencyCode>EUR</ram:InvoiceCurrencyCode><ram:ApplicableTradeTax><ram:CalculatedAmount>0.00</ram:CalculatedAmount><ram:TypeCode>VAT</ram:TypeCode><ram:BasisAmount>0.00</ram:BasisAmount><ram:CategoryCode>S</ram:CategoryCode><ram:RateApplicablePercent>19.00</ram:RateApplicablePercent></ram:ApplicableTradeTax><ram:SpecifiedTradeSettlementHeaderMonetarySummation><ram:LineTotalAmount>0.00</ram:LineTotalAmount><ram:TaxBasisTotalAmount>0.00</ram:TaxBasisTotalAmount><ram:TaxTotalAmount currencyID="EUR">0.00</ram:TaxTotalAmount><ram:GrandTotalAmount>0.00</ram:GrandTotalAmount><ram:DuePayableAmount>0.00</ram:DuePayableAmount></ram:SpecifiedTradeSettlementHeaderMonetarySummation></ram:ApplicableHeaderTradeSettlement></rsm:SupplyChainTradeTransaction></rsm:CrossIndustryInvoice>
+endstream
+endobj
+11 0 obj
+<<
+/Type /Filespec
+/F (factur\055x\056xml)
+/EF <<
+/F 10 0 R
+>>
+/Desc (Factur\055X\040Invoice)
+/AFRelationship /Data
+>>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000074 00000 n 
+0000000113 00000 n 
+0000000266 00000 n 
+0000000465 00000 n 
+0000001381 00000 n 
+0000001422 00000 n 
+0000001529 00000 n 
+0000001641 00000 n 
+0000002706 00000 n 
+0000005856 00000 n 
+trailer
+<<
+/Size 12
+/Root 3 0 R
+/Info 2 0 R
+>>
+startxref
+5991
+%%EOF

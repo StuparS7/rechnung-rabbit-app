@@ -3,6 +3,7 @@ import uuid
 import os
 from datetime import datetime
 from typing import List, Dict, Any, Tuple
+from decimal import Decimal, ROUND_HALF_UP
 import xml.etree.ElementTree as ET
 
 from pypdf import PdfReader, PdfWriter
@@ -22,28 +23,30 @@ ICC_PROFILE_PATH = os.path.join(BASE_DIR, 'sRGB_IEC61966-2-1_black_scaled.icc')
 
 # --- Functii Ajutatoare ---
 
-def _calculate_totals(items: List[Dict[str, Any]], is_small_business: bool = False) -> Tuple[float, float, float, Dict[float, Dict[str, float]]]:
+def _calculate_totals(items: List[Dict[str, Any]], is_small_business: bool = False) -> Tuple[Decimal, Decimal, Decimal, Dict[Decimal, Dict[str, Decimal]]]:
     """
     Calculează totalurile pe baza articolelor, gestionând multiple cote de TVA.
     Returnează: total_netto, total_vat, total_brutto, vat_summary.
     vat_summary are formatul: {rate: {'basis': basis_amount, 'vat': vat_amount}}
     """
-    total_netto = 0.0
+    TWO_PLACES = Decimal("0.01")
+    total_netto = Decimal("0.0")
     vat_summary = {}
 
     for item in items:
-        quantity = float(item.get("quantity", 0) or 0)
-        unit_price = float(item.get("unit_price", 0) or 0)
-        vat_rate = 0.0 if is_small_business else float(item.get("vat_rate", 0) or 0)
+        quantity = Decimal(str(item.get("quantity", "0") or "0"))
+        unit_price = Decimal(str(item.get("unit_price", "0") or "0"))
+        vat_rate = Decimal("0.0") if is_small_business else Decimal(str(item.get("vat_rate", "0") or "0"))
         
         line_netto = quantity * unit_price
         total_netto += line_netto
         
         if vat_rate not in vat_summary:
-            vat_summary[vat_rate] = {'basis': 0.0, 'vat': 0.0}
+            vat_summary[vat_rate] = {'basis': Decimal("0.0"), 'vat': Decimal("0.0")}
         
         vat_summary[vat_rate]['basis'] += line_netto
-        vat_summary[vat_rate]['vat'] += line_netto * (vat_rate / 100.0)
+        # Rotunjim TVA-ul per linie, o practică comună
+        vat_summary[vat_rate]['vat'] += (line_netto * (vat_rate / Decimal("100.0"))).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
 
     total_vat = sum(summary['vat'] for summary in vat_summary.values())
     total_brutto = total_netto + total_vat
@@ -52,8 +55,11 @@ def _calculate_totals(items: List[Dict[str, Any]], is_small_business: bool = Fal
 
 def _get_tax_category_code(vat_rate_str: str) -> str:
     """Returnează codul categoriei de taxă ZUGFeRD."""
-    rate = float(vat_rate_str)
-    return "S" if rate > 0 else "Z"
+    rate = Decimal(vat_rate_str)
+    if rate > 0:
+        return "S"  # Standard rate
+    # Conform EN 16931, pentru scutiri se folosește "O" (Outside scope of tax)
+    return "O"
 
 # --- Generare PDF Vizual (ReportLab) ---
 
@@ -121,51 +127,6 @@ def _build_reportlab_pdf(buffer: io.BytesIO, form_data: Dict[str, Any], items: L
         p_details.drawOn(canvas, A4[0] - doc.rightMargin - 80 * mm, A4[1] - 60 * mm)
         canvas.restoreState()
 
-    def _draw_footer(canvas, doc):
-        canvas.saveState()
-        
-        # Set font for footer
-        canvas.setFont(main_font, 8)
-        
-        # Build footer content
-        footer_lines = []
-        
-        # Notes and Payment Terms
-        is_small_business_footer = form_data.get('is_small_business') == 'true'
-        notes = form_data.get('notes', '')
-        if is_small_business_footer:
-            notes = "Gemäß § 19 UStG wird keine Umsatzsteuer berechnet.\n" + notes
-        
-        if notes.strip():
-            footer_lines.append(f"<b>Anmerkungen / Zahlungsbedingungen:</b><br/>{notes.strip().replace(chr(10), '<br/>')}")
-
-        # Bank, Tax, Legal details
-        details_lines = []
-        sender_iban = form_data.get('sender_iban', '')
-        if sender_iban:
-            details_lines.append(f"<b>IBAN:</b> {sender_iban}")
-        
-        sender_tax_id = form_data.get('sender_tax_id', '')
-        if sender_tax_id:
-            details_lines.append(f"<b>Steuernummer:</b> {sender_tax_id}")
-
-        register_court = form_data.get('register_court')
-        register_number = form_data.get('register_number')
-        managing_director = form_data.get('managing_director')
-        if register_court: details_lines.append(f"<b>Amtsgericht:</b> {register_court}")
-        if register_number: details_lines.append(f"<b>Registernummer:</b> {register_number}")
-        if managing_director: details_lines.append(f"<b>Geschäftsführer:</b> {managing_director}")
-
-        # Create two columns for the footer
-        notes_paragraph = Paragraph("<br/>".join(footer_lines), styles['Normal'])
-        details_paragraph = Paragraph("<br/>".join(details_lines), styles['Normal'])
-
-        footer_table = Table([[notes_paragraph, details_paragraph]], colWidths=[doc.width/2, doc.width/2])
-        footer_table.wrapOn(canvas, doc.width, doc.bottomMargin)
-        footer_table.drawOn(canvas, doc.leftMargin, 20 * mm) # Position at bottom
-        
-        canvas.restoreState()
-
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name='RightAlign', alignment=2, fontName=main_font))
     styles.add(ParagraphStyle(name='SenderLine', fontName=main_font, fontSize=8, leading=10, alignment=2))
@@ -192,9 +153,9 @@ def _build_reportlab_pdf(buffer: io.BytesIO, form_data: Dict[str, Any], items: L
 
     data = [["Beschreibung", "Menge", "Einzelpreis", "Gesamt"]]
     for item in items:
-        menge, preis = float(item.get("quantity", 0) or 0), float(item.get("unit_price", 0) or 0)
-        vat_rate = 0.0 if is_small_business else float(item.get("vat_rate", 0) or 0)
-        gesamt = (menge * preis) * (1 + vat_rate / 100.0)
+        menge, preis = Decimal(str(item.get("quantity", "0") or "0")), Decimal(str(item.get("unit_price", "0") or "0"))
+        vat_rate = Decimal("0.0") if is_small_business else Decimal(str(item.get("vat_rate", "0") or "0"))
+        gesamt = (menge * preis) * (Decimal("1") + vat_rate / Decimal("100.0"))
         data.append([
             item.get("description", ""),
             str(menge),
@@ -236,6 +197,9 @@ def _generate_zugferd_xml(form_data: Dict[str, Any], items: List[Dict[str, Any]]
     invoice_date_str = form_data.get('invoice_date', datetime.now().strftime('%Y-%m-%d'))
     invoice_date_obj = datetime.strptime(invoice_date_str, '%Y-%m-%d')
     
+    TWO_PLACES = Decimal("0.01")
+    FOUR_PLACES = Decimal("0.0001")
+
     is_small_business = form_data.get('is_small_business') == 'true'
     total_netto, total_vat, total_brutto, vat_summary = _calculate_totals(items, is_small_business)
     
@@ -255,7 +219,7 @@ def _generate_zugferd_xml(form_data: Dict[str, Any], items: List[Dict[str, Any]]
     context = ET.SubElement(root, f"{{{ns['rsm']}}}ExchangedDocumentContext")
     param = ET.SubElement(context, f"{{{ns['ram']}}}GuidelineSpecifiedDocumentContextParameter")
     # ID-ul oficial pentru ZUGFeRD 2.2 / Factur-X 1.0 BASIC Profile
-    ET.SubElement(param, f"{{{ns['ram']}}}ID").text = "urn:cen.eu:en16931:2017#compliant#urn:zugferd.de:2.2:compliant:basic"
+    ET.SubElement(param, f"{{{ns['ram']}}}ID").text = "urn:cen.eu:en16931:2017#compliant#urn:xoev-de:kosit:standard:xrechnung_2.2"
 
     # Header Document
     doc_header = ET.SubElement(root, f"{{{ns['rsm']}}}ExchangedDocument")
@@ -269,33 +233,36 @@ def _generate_zugferd_xml(form_data: Dict[str, Any], items: List[Dict[str, Any]]
 
     # Linii Articole
     for i, item in enumerate(items, 1):
-        menge = float(item.get("quantity", 0) or 0)
-        preis = float(item.get("unit_price", 0) or 0)
-        vat_rate = 0.0 if is_small_business else float(item.get("vat_rate", 0) or 0)
-        line_total = menge * preis
+        menge = Decimal(str(item.get("quantity", "0") or "0"))
+        preis = Decimal(str(item.get("unit_price", "0") or "0"))
+        vat_rate = Decimal("0.0") if is_small_business else Decimal(str(item.get("vat_rate", "0") or "0"))
+        line_total = (menge * preis).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
 
         line_item = ET.SubElement(transaction, f"{{{ns['ram']}}}IncludedSupplyChainTradeLineItem")
         line_doc = ET.SubElement(line_item, f"{{{ns['ram']}}}AssociatedDocumentLineDocument")
         ET.SubElement(line_doc, f"{{{ns['ram']}}}LineID").text = str(i)
         
         product = ET.SubElement(line_item, f"{{{ns['ram']}}}SpecifiedTradeProduct")
-        ET.SubElement(product, f"{{{ns['ram']}}}Name").text = item.get("description", "Produkt")
+        ET.SubElement(product, f"{{{ns['ram']}}}Name").text = item.get("description", "Beschreibung")
 
         delivery = ET.SubElement(line_item, f"{{{ns['ram']}}}SpecifiedLineTradeDelivery")
-        ET.SubElement(delivery, f"{{{ns['ram']}}}BilledQuantity", unitCode="C62").text = f"{menge:.4f}"
+        ET.SubElement(delivery, f"{{{ns['ram']}}}BilledQuantity", unitCode="C62").text = f"{menge.quantize(FOUR_PLACES)}"
 
         settlement = ET.SubElement(line_item, f"{{{ns['ram']}}}SpecifiedLineTradeSettlement")
         tax = ET.SubElement(settlement, f"{{{ns['ram']}}}ApplicableTradeTax")
         ET.SubElement(tax, f"{{{ns['ram']}}}TypeCode").text = "VAT"
-        ET.SubElement(tax, f"{{{ns['ram']}}}CategoryCode").text = _get_tax_category_code(str(vat_rate))
-        ET.SubElement(tax, f"{{{ns['ram']}}}RateApplicablePercent").text = f"{vat_rate:.2f}"
+        category_code = _get_tax_category_code(str(vat_rate))
+        ET.SubElement(tax, f"{{{ns['ram']}}}CategoryCode").text = category_code
+        if category_code == "O":
+            ET.SubElement(tax, f"{{{ns['ram']}}}ExemptionReasonCode").text = "VATEX-EU-DE"
+        ET.SubElement(tax, f"{{{ns['ram']}}}RateApplicablePercent").text = f"{vat_rate.quantize(TWO_PLACES)}"
 
         summation = ET.SubElement(settlement, f"{{{ns['ram']}}}SpecifiedTradeSettlementLineMonetarySummation")
-        ET.SubElement(summation, f"{{{ns['ram']}}}LineTotalAmount").text = f"{line_total:.2f}"
+        ET.SubElement(summation, f"{{{ns['ram']}}}LineTotalAmount").text = f"{line_total.quantize(TWO_PLACES)}"
 
         trade_agreement = ET.SubElement(line_item, f"{{{ns['ram']}}}SpecifiedLineTradeAgreement")
         trade_price = ET.SubElement(trade_agreement, f"{{{ns['ram']}}}NetPriceProductTradePrice") 
-        ET.SubElement(trade_price, f"{{{ns['ram']}}}ChargeAmount").text = f"{preis:.4f}"
+        ET.SubElement(trade_price, f"{{{ns['ram']}}}ChargeAmount").text = f"{preis.quantize(FOUR_PLACES)}"
 
     # Acord Comercial (Vânzător / Cumpărător)
     agreement = ET.SubElement(transaction, f"{{{ns['ram']}}}ApplicableHeaderTradeAgreement")
@@ -307,12 +274,21 @@ def _generate_zugferd_xml(form_data: Dict[str, Any], items: List[Dict[str, Any]]
     ET.SubElement(seller_addr, f"{{{ns['ram']}}}CityName").text = form_data.get('sender_city', '')
     ET.SubElement(seller_addr, f"{{{ns['ram']}}}CountryID").text = "DE"
     
-    # Tax ID Vanzator
+    # Tax ID Vanzator (Steuernummer)
     if form_data.get('sender_tax_id'):
         seller_tax = ET.SubElement(seller, f"{{{ns['ram']}}}SpecifiedTaxRegistration")
         ET.SubElement(seller_tax, f"{{{ns['ram']}}}ID", schemeID="FC").text = form_data.get('sender_tax_id') # FC = Tax Number
 
+    # VAT ID Vanzator (USt-IdNr.)
+    if form_data.get('sender_vat_id'):
+        seller_vat = ET.SubElement(seller, f"{{{ns['ram']}}}SpecifiedTaxRegistration")
+        ET.SubElement(seller_vat, f"{{{ns['ram']}}}ID", schemeID="VA").text = form_data.get('sender_vat_id') # VA = VAT Number
+
     buyer = ET.SubElement(agreement, f"{{{ns['ram']}}}BuyerTradeParty")
+    # Leitweg-ID (BT-10), esențial pentru facturile către autorități publice (XRechnung)
+    if form_data.get('leitweg_id'):
+        ET.SubElement(buyer, f"{{{ns['ram']}}}BuyerReference").text = form_data.get('leitweg_id')
+
     ET.SubElement(buyer, f"{{{ns['ram']}}}Name").text = form_data.get('receiver_name', 'Kunde')
     buyer_addr = ET.SubElement(buyer, f"{{{ns['ram']}}}PostalTradeAddress")
     ET.SubElement(buyer_addr, f"{{{ns['ram']}}}PostcodeCode").text = form_data.get('receiver_zip', '')
@@ -333,19 +309,22 @@ def _generate_zugferd_xml(form_data: Dict[str, Any], items: List[Dict[str, Any]]
     # Taxe Totale
     for rate, summary in vat_summary.items():
         trade_tax = ET.SubElement(header_settlement, f"{{{ns['ram']}}}ApplicableTradeTax")
-        ET.SubElement(trade_tax, f"{{{ns['ram']}}}CalculatedAmount").text = f"{summary['vat']:.2f}"
+        ET.SubElement(trade_tax, f"{{{ns['ram']}}}CalculatedAmount").text = f"{summary['vat'].quantize(TWO_PLACES)}"
         ET.SubElement(trade_tax, f"{{{ns['ram']}}}TypeCode").text = "VAT"
-        ET.SubElement(trade_tax, f"{{{ns['ram']}}}BasisAmount").text = f"{summary['basis']:.2f}"
-        ET.SubElement(trade_tax, f"{{{ns['ram']}}}CategoryCode").text = _get_tax_category_code(str(rate))
-        ET.SubElement(trade_tax, f"{{{ns['ram']}}}RateApplicablePercent").text = f"{rate:.2f}"
-
+        ET.SubElement(trade_tax, f"{{{ns['ram']}}}BasisAmount").text = f"{summary['basis'].quantize(TWO_PLACES)}"
+        ET.SubElement(trade_tax, f"{{{ns['ram']}}}CategoryCode").text = _get_tax_category_code(str(rate.quantize(TWO_PLACES)))
+        # Adaugă motivul scutirii dacă este cazul (esențial pentru codul 'O')
+        if _get_tax_category_code(str(rate.quantize(TWO_PLACES))) == "O":
+            ET.SubElement(trade_tax, f"{{{ns['ram']}}}ExemptionReasonCode").text = "VATEX-EU-DE" # Cod recomandat pentru scutiri naționale germane, inclusiv §19 UStG
+        ET.SubElement(trade_tax, f"{{{ns['ram']}}}RateApplicablePercent").text = f"{rate.quantize(TWO_PLACES)}"
+    
     header_summation = ET.SubElement(header_settlement, f"{{{ns['ram']}}}SpecifiedTradeSettlementHeaderMonetarySummation")
-    ET.SubElement(header_summation, f"{{{ns['ram']}}}LineTotalAmount").text = f"{total_netto:.2f}"
-    ET.SubElement(header_summation, f"{{{ns['ram']}}}TaxBasisTotalAmount").text = f"{total_netto:.2f}"
-    ET.SubElement(header_summation, f"{{{ns['ram']}}}TaxTotalAmount", currencyID="EUR").text = f"{total_vat:.2f}"
-    ET.SubElement(header_summation, f"{{{ns['ram']}}}GrandTotalAmount").text = f"{total_brutto:.2f}"
-    ET.SubElement(header_summation, f"{{{ns['ram']}}}DuePayableAmount").text = f"{total_brutto:.2f}"
-
+    ET.SubElement(header_summation, f"{{{ns['ram']}}}LineTotalAmount").text = f"{total_netto.quantize(TWO_PLACES)}"
+    ET.SubElement(header_summation, f"{{{ns['ram']}}}TaxBasisTotalAmount").text = f"{total_netto.quantize(TWO_PLACES)}"
+    ET.SubElement(header_summation, f"{{{ns['ram']}}}TaxTotalAmount", currencyID="EUR").text = f"{total_vat.quantize(TWO_PLACES)}"
+    ET.SubElement(header_summation, f"{{{ns['ram']}}}GrandTotalAmount").text = f"{total_brutto.quantize(TWO_PLACES)}"
+    ET.SubElement(header_summation, f"{{{ns['ram']}}}DuePayableAmount").text = f"{total_brutto.quantize(TWO_PLACES)}"
+    
     return ET.tostring(root, encoding='UTF-8', xml_declaration=True)
 
 
@@ -376,8 +355,8 @@ def _make_pdfa_compliant(pdf_buffer: io.BytesIO, xml_data: bytes, form_data: Dic
     <rdf:Description rdf:about="" xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#">
       <fx:DocumentType>INVOICE</fx:DocumentType>
       <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
-      <fx:Version>1.0</fx:Version>
-      <fx:ConformanceLevel>BASIC</fx:ConformanceLevel>
+      <fx:Version>1.0</fx:Version> 
+      <fx:ConformanceLevel>EN 16931</fx:ConformanceLevel>
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>
@@ -431,8 +410,8 @@ def _make_pdfa_compliant(pdf_buffer: io.BytesIO, xml_data: bytes, form_data: Dic
         NameObject("/F"): TextStringObject(xml_filename),
         NameObject("/EF"): DictionaryObject({NameObject("/F"): xml_stream_ref}),
         NameObject("/Desc"): TextStringObject("Factur-X Invoice"),
-        # RELAȚIA: Trebuie să fie /Alternative pentru ZUGFeRD, nu /Data
-        NameObject("/AFRelationship"): NameObject("/Alternative"), 
+        # RELAȚIA: /Data este necesară pentru conformitate XRechnung (B2G)
+        NameObject("/AFRelationship"): NameObject("/Data"), 
     })
     filespec_ref = writer._add_object(filespec_obj)
 

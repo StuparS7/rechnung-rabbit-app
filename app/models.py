@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Boolean, Numeric
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -27,6 +27,8 @@ class Client(Base):
     address = Column(String)
     zip_code = Column(String)
     city = Column(String)
+    leitweg_id = Column(String, nullable=True)
+    vat_id = Column(String, nullable=True)
     owner_id = Column(String, index=True) # Supabase user ID (UUID string)
 
 class Invoice(Base):
@@ -34,7 +36,7 @@ class Invoice(Base):
     id = Column(Integer, primary_key=True, index=True)
     invoice_number = Column(String, index=True)
     invoice_date = Column(Date)
-    total_amount = Column(Float)
+    total_amount = Column(Numeric(10, 2)) # Precizie de 10 cifre, 2 zecimale
     pdf_file_path = Column(String) # Store path to PDF file
     owner_id = Column(String, index=True) # Supabase user ID (UUID string)
     
@@ -47,9 +49,9 @@ class LineItem(Base):
     __tablename__ = "line_items"
     id = Column(Integer, primary_key=True, index=True)
     description = Column(String)
-    quantity = Column(Float)
-    unit_price = Column(Float)
-    vat_rate = Column(Float) # Adaugă această linie
+    quantity = Column(Numeric(10, 4)) # Permitem 4 zecimale pentru cantități/prețuri unitare
+    unit_price = Column(Numeric(10, 4))
+    vat_rate = Column(Numeric(5, 2))
     invoice_id = Column(Integer, ForeignKey("invoices.id"))
 
     invoice = relationship("Invoice", back_populates="line_items")

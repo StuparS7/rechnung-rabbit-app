@@ -43,6 +43,20 @@ def delete_client(db: Session, client_id: int, owner_id: str):
         db.delete(db_client)
         db.commit()
 
+def update_client(db: Session, client_id: int, client_data: schemas.ClientCreate, owner_id: str):
+    db_client = get_client(db, client_id=client_id, owner_id=owner_id)
+    if not db_client:
+        return None
+
+    # Actualizează câmpurile clientului cu datele primite
+    update_data = client_data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_client, key, value)
+    
+    db.commit()
+    db.refresh(db_client)
+    return db_client
+
 # --- Invoices ---
 def create_invoice(db: Session, invoice: schemas.InvoiceCreate, line_items_data: list, owner_id: str, client_id: int = None):
     db_invoice = models.Invoice(**invoice.dict(), owner_id=owner_id, client_id=client_id)

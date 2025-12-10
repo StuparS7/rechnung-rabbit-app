@@ -1,91 +1,200 @@
 {% extends "base.html" %}
 
-{% block title %}Kunden - {{ super() }}{% endblock %}
+{% block title %}Kunden verwalten{% endblock %}
 
 {% block head_styles %}
-    <style>
-        .container {max-width: 1000px; margin: 2rem auto; padding: 2rem;}
-        h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 1rem;}
-        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start; }
-        .card { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); }
-        h2 { font-size: 1.5rem; color: #1e40af; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;}
-        
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
-        th { background-color: #f9fafb; color: #475569; font-weight: 600; }
-        tr:last-child td { border-bottom: none; }
+<style>
+    .container {max-width: 1000px; margin: 2rem auto; padding: 2rem;}
+    h1 {font-size: 2.5rem; color: #1e40af; margin-bottom: 1rem;}
+    .card { background-color: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.07); margin-bottom: 2rem;}
+    h2 { font-size: 1.5rem; color: #1e40af; margin-top: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;}
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; }
+    th { background-color: #f9fafb; color: #475569; font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
 
-        .delete-btn {
-            background-color: #fee2e2; color: #b91c1c; border: none;
-            padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer;
-            font-size: 0.8rem; font-weight: 500;
-        }
-        .delete-btn:hover { background-color: #fecaca; }
+    label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+    input[type="text"] {
+        width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
+        font-size: 1rem; box-sizing: border-box;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid .full-width { grid-column: 1 / -1; }
+    .form-grid .submit-container { grid-column: 1 / -1; text-align: right; }
+    .form-grid div { margin-bottom: 1rem; }
 
-        label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
-        input[type="text"] {
-            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px;
-            font-size: 1rem; box-sizing: border-box; margin-bottom: 1rem;
-        }
-        button[type="submit"] {
-            display: block; width: 100%; background: #22c55e; color: white; 
-            padding: 0.75rem; font-size: 1rem; border-radius: 8px;
-            font-weight: bold; border: none; cursor: pointer; margin-top: 1rem;
-        }
-    </style>
+    .btn {
+        padding: 0.5rem 1.25rem; border-radius: 8px; text-decoration: none; 
+        font-weight: 500; font-size: 0.9rem; border: 1px solid transparent; cursor: pointer;
+    }
+    .btn-primary { background-color: #3b82f6; color: white; }
+    .btn-danger { background-color: #ef4444; color: white; }
+    .btn-edit { color: #3b82f6; font-weight: 500; background: none; border: none; cursor: pointer; padding: 0; }
+    .btn-delete { color: #ef4444; font-weight: 500; background: none; border: none; cursor: pointer; padding: 0; }
+
+    /* Modal Styles */
+    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .modal-header { padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; }
+    .modal-body { padding: 1rem 0; }
+    .modal-body .form-grid { grid-template-columns: 1fr; }
+    .modal-footer { padding-top: 1rem; border-top: 1px solid #e5e7eb; text-align: right; }
+    .modal-footer .btn { margin-left: 0.5rem; }
+    .btn-secondary { background-color: #e5e7eb; color: #374151; }
+
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Kunden verwalten</h1>
-    <div class="grid">
-        <div class="card">
-            <h2>Ihre Kunden</h2>
-            {% if clients %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Adresse</th>
-                        <th>Stadt</th>
-                        <th>PLZ</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for client in clients %}
-                    <tr>
-                        <td>{{ client.name }}</td>
-                        <td>{{ client.address }}</td>
-                        <td>{{ client.city }}</td>
-                        <td>{{ client.zip_code }}</td>
-                        <td>
-                            <form action="/kunden/delete/{{ client.id }}" method="post" onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Kunden löschen möchten? Es können keine Rechnungen mit ihm verknüpft sein.');">
-                                <button type="submit" class="delete-btn">Löschen</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>Sie haben noch keine Kunden hinzugefügt.</p>
-            {% endif %}
-        </div>
-        <div class="card">
-            <h2>Neuen Kunden hinzufügen</h2>
-            <form action="/kunden" method="post">
-                <label for="name">Name / Firma:</label>
-                <input type="text" id="name" name="name" required>
-                <label for="address">Adresse:</label>
-                <input type="text" id="address" name="address" required>
-                <label for="zip_code">PLZ:</label>
-                <input type="text" id="zip_code" name="zip_code" required>
-                <label for="city">Stadt:</label>
-                <input type="text" id="city" name="city" required>
-                <button type="submit">Kunden speichern</button>
+    <h1>Kundenverwaltung</h1>
+
+    <div class="card">
+        <h2>Neuen Kunden hinzufügen</h2>
+        <form action="/kunden" method="post" class="form-grid">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" required>
+            </div>
+            <div>
+                <label for="address">Adresse</label>
+                <input type="text" name="address" id="address" required>
+            </div>
+            <div>
+                <label for="zip_code">PLZ</label>
+                <input type="text" name="zip_code" id="zip_code" required pattern="\d{5}" title="Bitte geben Sie eine 5-stellige Postleitzahl ein." maxlength="5">
+            </div>
+            <div>
+                <label for="city">Stadt</label>
+                <input type="text" name="city" id="city" required>
+            </div>
+            <div class="full-width">
+                <label for="vat_id">USt-IdNr. (optional, für EU-Geschäfte)</label>
+                <input type="text" name="vat_id" id="vat_id" placeholder="z.B. DE123456789">
+            </div>
+            <div class="full-width">
+                <label for="leitweg_id">Leitweg-ID (optional, für XRechnung)</label>
+                <input type="text" name="leitweg_id" id="leitweg_id" placeholder="z.B. 04-12345-67">
+            </div>
+            <div class="submit-container">
+                <button type="submit" class="btn btn-primary">
+                    Kunde speichern
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Vorhandene Kunden</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Adresse</th>
+                    <th>USt-IdNr.</th>
+                    <th>Leitweg-ID</th>
+                    <th style="text-align: right;">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.address }}, {{ client.zip_code }} {{ client.city }}</td>
+                    <td>{{ client.vat_id or '-' }}</td>
+                    <td>{{ client.leitweg_id or '-' }}</td>
+                    <td style="text-align: right;">
+                        <button onclick='openEditModal({{ client | tojson | safe }})' class="btn-edit" style="margin-right: 1rem;">Bearbeiten</button>
+                        <form action="/kunden/delete/{{ client.id }}" method="post" style="display: inline;" onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Kunden löschen möchten? Dies kann nicht rückgängig gemacht werden.');">
+                            <button type="submit" class="btn-delete">Löschen</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit Client Modal -->
+    <div id="editClientModal" class="modal">
+        <div class="modal-content">
+            <form id="editClientForm" method="post">
+                <div class="modal-header">
+                    <h2>Kunden bearbeiten</h2>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div>
+                            <label for="edit_name">Name</label>
+                            <input type="text" name="name" id="edit_name" required>
+                        </div>
+                        <div>
+                            <label for="edit_address">Adresse</label>
+                            <input type="text" name="address" id="edit_address" required>
+                        </div>
+                        <div>
+                            <label for="edit_zip_code">PLZ</label>
+                            <input type="text" name="zip_code" id="edit_zip_code" required pattern="\d{5}" title="Bitte geben Sie eine 5-stellige Postleitzahl ein." maxlength="5">
+                        </div>
+                        <div>
+                            <label for="edit_city">Stadt</label>
+                            <input type="text" name="city" id="edit_city" required>
+                        </div>
+                        <div>
+                            <label for="edit_vat_id">USt-IdNr.</label>
+                            <input type="text" name="vat_id" id="edit_vat_id" placeholder="z.B. DE123456789">
+                        </div>
+                        <div>
+                            <label for="edit_leitweg_id">Leitweg-ID</label>
+                            <input type="text" name="leitweg_id" id="edit_leitweg_id">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary">
+                        Abbrechen
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                            Speichern
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const modal = document.getElementById('editClientModal');
+    const form = document.getElementById('editClientForm');
+
+    function openEditModal(client) {
+        // Setează acțiunea formularului cu ID-ul clientului
+        form.action = `/kunden/edit/${client.id}`;
+
+        // Pre-populează câmpurile formularului
+        document.getElementById('edit_name').value = client.name;
+        document.getElementById('edit_address').value = client.address;
+        document.getElementById('edit_zip_code').value = client.zip_code;
+        document.getElementById('edit_city').value = client.city;
+        document.getElementById('edit_vat_id').value = client.vat_id || '';
+        document.getElementById('edit_leitweg_id').value = client.leitweg_id || '';
+
+        // Afișează modalul
+        modal.style.display = 'block';
+    }
+
+    function closeEditModal() {
+        modal.style.display = 'none';
+    }
+
+    // Închide modalul dacă se dă click în afara lui
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeEditModal();
+        }
+    }
+</script>
 {% endblock %}
